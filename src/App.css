@@ -1,0 +1,23 @@
+.App {
+  text-align: center;
+}
+
+.App h1 {
+  font-size: 25vh;
+  margin: 0;
+  padding: 0
+}
+
+.App h2 {
+  font-size: 18vh;
+  margin: 0;
+  padding: 0;
+}
+
+.App p {
+  font-size: 3vh;
+}
+
+.secondary {
+  color: #FFD34E
+}
