@@ -21,15 +21,19 @@ class App extends Component {
     },
     geolocation_supported: undefined,
     distance: undefined,
-    hurricane_name: 'Matthew'
+    hurricane_name: 'MATTHEW'
   };
 
   getLocation = () => {
     if (navigator.geolocation) {
-      this.state.geolocation_supported = true;
+      this.setState({
+        geolocation_supported: true
+      });
       navigator.geolocation.getCurrentPosition(this.showLocation);
     } else {
-      this.state.geolocation_supported = false;
+      this.setState({
+        geolocation_supported: false
+      });
     }
   }
 
@@ -44,11 +48,17 @@ class App extends Component {
   }
 
   getHurricaneInfo = () => {
-    var url = `https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteocean_tropicalcyclones_trackintensityfcsts_time/MapServer/3/query?where=stormname+%3D+%27MATTHEW%27&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=4236&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&returnDistinctValues=false&f=json`;
+    var url = `https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/wwa_meteocean_tropicalcyclones_trackintensityfcsts_time/MapServer/3/query?where=stormname='${this.state.hurricane_name}'&text=&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=4236&returnIdsOnly=false&returnCountOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&gdbVersion=&returnDistinctValues=false&f=json`;
     xhr({
       url: url
     }, (err, data) => {
       var resp = JSON.parse(data.body);
+      resp.features.sort((a, b) => {
+        a = a.attributes.fldatelbl.split(' ');
+        b = b.attributes.fldatelbl.split(' ');
+        return new Date(a[0] + ' ' + a[1]) - new Date(b[0] + ' ' + b[1]);
+      });
+
       this.setState({
         hurricane_info: {
         center: {
@@ -97,10 +107,10 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <h1>{this.state.distance ? this.state.distance : 'loading'}</h1>
+        <h1>{this.state.geolocation_supported ? this.state.distance : 'No Location Shared'}</h1>
         <h2>Miles</h2>
         <p>Your Location ({this.state.location.lat}, {this.state.location.lng}) is {this.state.distance ? this.state.distance : '...'} miles from Hurricane {this.state.hurricane_name}</p>
-        <p className='secondary'>Max Wind: {this.state.hurricane_info.maxwind}, Gusts: {this.state.hurricane_info.gusts}, Status: {this.state.hurricane_info.tcdvlp} </p>
+        <p className='secondary'>Max Wind: {this.state.hurricane_info.maxwind} - Gusts: {this.state.hurricane_info.gusts} - Status: {this.state.hurricane_info.tcdvlp} </p>
       </div>
     );
   }
