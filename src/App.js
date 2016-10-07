@@ -40,11 +40,24 @@ class App extends Component {
   showLocation = (pos) => {
     this.setState({
       location: {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude
+        lat: pos.coords.latitude.toFixed(3),
+        lng: pos.coords.longitude.toFixed(3)
       }
     });
     this.getHurricaneInfo();
+  }
+
+  formatDate = (date) => {
+    //["2016-10-07", "2:00", "AM", "Fri", "EDT"]
+    var fdate = new Date(date[0]);
+    var hours = date[1].split(':')[0];
+    hours = (date[2] === 'AM') ? hours : hours + 12;
+    var minutes = date[1].split(':')[1];
+
+    fdate.setHours(hours);
+    fdate.setMinutes(minutes);
+
+    return fdate;
   }
 
   getHurricaneInfo = () => {
@@ -56,7 +69,7 @@ class App extends Component {
       resp.features.sort((a, b) => {
         a = a.attributes.fldatelbl.split(' ');
         b = b.attributes.fldatelbl.split(' ');
-        return new Date(a[0] + ' ' + a[1]) - new Date(b[0] + ' ' + b[1]);
+        return this.formatDate(a) - this.formatDate(b);
       });
 
       this.setState({
